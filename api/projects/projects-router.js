@@ -1,25 +1,43 @@
 const express = require('express')
 const Projects = require('./projects-model')
+const {validateProjectId, validateProject} = require('../middleware/projects-middleware');
 const router = express.Router();
 
-router.get("/", () => {
-  // returns an array of actions (or an empty array) as the body of the _response_.
+router.get("/", (req,res,next) => {
+  Projects.get()
+    .then(projects => {
+    res.status(200).json(projects)
+    })
+  .catch(next)
 })
 
-router.get("/:id", () => {
-  //returns an action with the given `id` as the body of the _response_.
+router.get('/:id', validateProjectId, (req, res) => {
+  res.json(req.project)
+});
+
+router.post("/", validateProject, (req, res, next) => {
+  Projects.insert(req.body)
+    .then(newProject => {
+      res.status(201).json(newProject)
+  })
+  .catch(next)
 })
 
-router.post("/", () => {
-  //returns the newly created action as the body of the _response_.
+router.put("/:id", validateProjectId, validateProject, (req, res, next) => {
+  Projects.update(req.params.id, req.body)
+    .then(udpatedProject => {
+    res.status(200).json(udpatedProject)
+    })
+  .catch(next)
 })
 
-router.put("/:id", () => {
-  //returns the updated action as the body of the _response_.
-})
-
-router.delete("./:id", () => {
-  //returns no _response_ body
+router.delete("/:id", validateProjectId, async (req, res, next) => {
+  try {
+    await Projects.remove(req.params.id)
+    req.json(req.project)
+  } catch (err) {
+    next(err)
+  }
 })
 
 module.exports = router
