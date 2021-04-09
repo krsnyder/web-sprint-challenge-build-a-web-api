@@ -1,10 +1,9 @@
 const express = require('express')
 const Actions = require('./actions-model')
-const {validateActionId} = require('../middleware/actions-middleware')
+const {validateActionId, validateAction} = require('../middleware/actions-middleware')
 const router = express.Router();
 
 router.get("/", (req,res,next) => {
-  // returns an array of actions (or an empty array) as the body of the _response_.
   Actions.get()
     .then(actions => {
     res.status(200).json(actions)
@@ -13,16 +12,23 @@ router.get("/", (req,res,next) => {
 })
 
 router.get('/:id', validateActionId, (req, res) => {
-  console.log(req.action)
   res.json(req.action)
 });
 
-router.post("/", () => {
-  //returns the newly created action as the body of the _response_.
+router.post("/", validateAction, (req, res, next) => {
+  Actions.insert(req.body)
+    .then(newAction => {
+      res.status(201).json(newAction)
+  })
+  .catch(next)
 })
 
-router.put("/:id", () => {
-  //returns the updated action as the body of the _response_.
+router.put("/:id", validateActionId, validateAction, (req, res, next) => {
+  Actions.update(req.params.id, req.body)
+    .then(udpatedAction => {
+    res.status(200).json(udpatedAction)
+    })
+  .catch(next)
 })
 
 router.delete("./:id", () => {
