@@ -22,7 +22,6 @@ function validateAction(req, res, next) {
   console.log("req body: ", req.body)
   const {project_id, description, notes} = req.body
 if (!project_id || !description || !notes) {
-  // if(false){
   res.status(400).json({
       message: "Project Id, Description, and Notes are required"
     })

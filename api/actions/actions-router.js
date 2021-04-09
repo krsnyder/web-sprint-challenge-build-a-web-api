@@ -1,6 +1,6 @@
 const express = require('express')
 const Actions = require('./actions-model')
-const {validateActionId, validateAction} = require('../middleware/actions-middleware')
+const {validateActionId, validateAction} = require('../middleware/actions-middleware');
 const router = express.Router();
 
 router.get("/", (req,res,next) => {
@@ -31,8 +31,13 @@ router.put("/:id", validateActionId, validateAction, (req, res, next) => {
   .catch(next)
 })
 
-router.delete("./:id", () => {
-  //returns no _response_ body
+router.delete("/:id", validateActionId, async (req, res, next) => {
+  try {
+    await Actions.remove(req.params.id)
+    req.json(req.action)
+  } catch (err) {
+    next(err)
+  }
 })
 
 module.exports = router
